@@ -1,5 +1,5 @@
-import { Button, Flex, List } from "@chakra-ui/react";
-import { useState } from "react";
+import { Box, Button, Center, Flex, List } from "@chakra-ui/react";
+import { Dispatch, FC, SetStateAction } from "react";
 import EditItem from "./EditItem";
 
 export interface editItemType {
@@ -8,9 +8,13 @@ export interface editItemType {
   image: Blob | undefined;
 }
 
-const TimecodeEditor = () => {
-  const [editItems, setEditItems] = useState<editItemType[]>();
-  const [editItemsCount, setEditItemsCount] = useState<number>(0);
+interface TimecodeEditorProps {
+  editItems: editItemType[] | undefined
+  setEditItems: Dispatch<SetStateAction<editItemType[] | undefined>>
+  editItemsCount: number
+  setEditItemsCount: Dispatch<SetStateAction<number>>
+}
+const TimecodeEditor:FC<TimecodeEditorProps> = ({editItems,editItemsCount,setEditItems,setEditItemsCount}) => {
 
   const addEditorItem = () => {
     setEditItemsCount((prev) => prev + 1);
@@ -21,15 +25,17 @@ const TimecodeEditor = () => {
     );
   };
   return (
-    <Flex direction="column" w="2xl" h="full">
-      <Button w="16" m="auto" onClick={addEditorItem}>
-        追加
-      </Button>
-      <List overflowY="scroll">
+    <Flex direction="column" h="full">
+      <List overflowY="scroll" h="full">
         {editItems?.map((item, index) => (
           <EditItem key={index} item={item} setEditItems={setEditItems} />
         ))}
       </List>
+      <Center w="full" h="16" minH={16}>
+        <Button w="16" h="10" minH={10} m="auto" onClick={addEditorItem}>
+          追加
+        </Button>
+      </Center>
     </Flex>
   );
 };

@@ -1,13 +1,25 @@
-import {
-  Box,
-} from "@chakra-ui/react";
+import { Box, Center } from "@chakra-ui/react";
+import { useState } from "react";
 import "./App.css";
-import TimecodeEditor from "./components/TimecodeEditor";
+import CanvasScreen from "./components/CanvasScreen";
+import TimecodeEditor, { editItemType } from "./components/TimecodeEditor";
 function App() {
+  const [editItems, setEditItems] = useState<editItemType[]>();
+  const [editItemsCount, setEditItemsCount] = useState<number>(0);
   return (
-    <Box className="App" w="100vw" h="100vh">
-      <TimecodeEditor/>
-    </Box>
+    <Center className="App" w="100vw" h="100vh">
+      <Box flex={4} h="full">
+        <CanvasScreen editItems={editItems} editItemsCount={editItemsCount} />
+      </Box>
+      <Box flex={3} h="full">
+        <TimecodeEditor
+          editItems={editItems}
+          setEditItems={setEditItems}
+          editItemsCount={editItemsCount}
+          setEditItemsCount={setEditItemsCount}
+        />
+      </Box>
+    </Center>
   );
 }
 
