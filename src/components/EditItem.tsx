@@ -40,12 +40,12 @@ const EditItem: FC<EditItemProps> = ({ item, setEditItems }) => {
     );
   };
   return (
-    <ListItem>
-      <Center>
-        <Center boxSize="sm">
+    <ListItem h="2xs">
+      <Center h="full">
+        <Center flex={1} boxSize="fit-content">
           <Image src={item.image && URL.createObjectURL(item.image)} />
         </Center>
-        <Center flexDirection="column">
+        <Center flex={1} flexDirection="column">
           <Input
             type="file"
             accept="image/*"

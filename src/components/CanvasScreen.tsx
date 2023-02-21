@@ -11,6 +11,15 @@ const height = 200;
 const CanvasScreen: FC<CanvasScreenProps> = ({ editItems, editItemsCount }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [imageElement, setImageElement] = useState<HTMLImageElement[]>();
+  const [videoState, setVideoState] = useState<"init" | "canplay" | "playing">(
+    "init"
+  );
+  const [blobUrl, setBlobUrl] = useState<string>("");
+  const getCanvas = (): HTMLCanvasElement => {
+    const canvas: any = canvasRef.current;
+
+    return canvas;
+  };
   const getContext = (): CanvasRenderingContext2D => {
     const canvas: any = canvasRef.current;
 
@@ -22,37 +31,69 @@ const CanvasScreen: FC<CanvasScreenProps> = ({ editItems, editItemsCount }) => {
     ctx.clearRect(0, 0, width, height);
     ctx.fillStyle = "#fff";
     ctx.fillRect(0, 0, width, height);
-    // if (editItems[0].image) {
-      const img = new Image();
-      if(editItems[0].image) img.src = URL.createObjectURL(editItems[0].image);
-      ctx.fillStyle = "#000";
-      ctx.fillRect(0, 0, width, height);
-      img.onload = () => {
-        ctx.drawImage(img, 0, 0, width, height); //10, 10, 200, 50);
-      };
-      setImageElement((prev) =>
-        prev
-          ? editItems.map((item) => {
-              const imgEle = new Image();
-              if (item.image) imgEle.src = URL.createObjectURL(item.image);
-              return imgEle;
-            })
-          : [img]
-      );
+    const img = new Image();
+    if (editItems[0].image) img.src = URL.createObjectURL(editItems[0].image);
+    ctx.fillStyle = "#000";
+    ctx.fillRect(0, 0, width, height);
+    img.onload = () => {
+      ctx.drawImage(img, 0, 0, width, height); //10, 10, 200, 50);
+    };
+    setImageElement((prev) =>
+      prev
+        ? editItems.map((item) => {
+            const imgEle = new Image();
+            if (item.image) imgEle.src = URL.createObjectURL(item.image);
+            return imgEle;
+          })
+        : [img]
+    );
     ctx.save();
+    setVideoState("canplay");
   };
-  const animationStart = async () => {
-    if (!imageElement || !editItems) return
+  const animationStart = async (isExport: boolean) => {
+    if (!imageElement || !editItems || videoState === "playing") return;
+    setVideoState("playing");
     const ctx: CanvasRenderingContext2D = getContext();
-    const timer =(sec:number) => new Promise<void>((resolve)=>setTimeout(() => resolve(), sec * 1000))
+    const timer = (sec: number) =>
+      new Promise<void>((resolve) => setTimeout(() => resolve(), sec * 1000));
+    const recorder = (() => {
+      //canvasの取得
+      const canvas = getCanvas();
+      //canvasからストリームを取得
+      const stream = canvas.captureStream();
+      //ストリームからMediaRecorderを生成
+      const recorder = new MediaRecorder(stream, {
+        mimeType: "video/webm;codecs=vp9",
+      });
+      return recorder;
+    })();
+    if (isExport) {
+      //ダウンロード用のリンクを準備
+      //録画終了時に動画ファイルのダウンロードリンクを生成する処理
+      recorder.ondataavailable = function (e) {
+        const videoBlob = new Blob([e.data], { type: e.data.type });
+        const blob_Url = window.URL.createObjectURL(videoBlob);
+        setBlobUrl(blob_Url);
+      };
+      //録画開始
+      recorder.start();
+    }
     for (let index = 0; index < imageElement.length; index++) {
       ctx.fillStyle = "#000";
       ctx.fillRect(0, 0, width, height);
       ctx.drawImage(imageElement[index], 0, 0, width, height); //10, 10, 200, 50);
-      await timer(editItems[index].sec)
+      await timer(editItems[index].sec);
     }
+
     ctx.fillRect(0, 0, width, height);
     ctx.save();
+    setVideoState("canplay");
+    if (isExport) {
+      recorder.stop();
+    }
+  };
+  const startExport = () => {
+    animationStart(true);
   };
   useEffect(checkItem, [editItems]);
   return (
@@ -66,13 +107,43 @@ const CanvasScreen: FC<CanvasScreenProps> = ({ editItems, editItemsCount }) => {
         ></canvas>
       </Box>
       <Flex>
-        {/* <Button isDisabled={true} onClick={animationStart}> */}
-        <Button isDisabled={false} onClick={animationStart}>
+        <Button
+          isDisabled={(() => {
+            switch (videoState) {
+              case "init":
+                return true;
+              case "canplay":
+                return false;
+              case "playing":
+                return true;
+            }
+          })()}
+          onClick={() => animationStart(false)}
+        >
           再生
         </Button>
-        <Button isDisabled={true}>停止</Button>
-        <Button isDisabled={true}>エクスポート</Button>
+        {/* <Button isDisabled={videoState !== "playing"}>
+          停止
+        </Button> */}
+        <Button isDisabled={videoState !== "canplay"} onClick={startExport}>
+          エクスポート
+        </Button>
       </Flex>
+      <Box>
+        {blobUrl !== "" ? (
+          <video
+            src={blobUrl}
+            controls
+            style={{
+              borderBlock: "solid",
+              borderWidth: 1,
+              borderColor: "#000",
+            }}
+          ></video>
+        ) : (
+          <></>
+        )}
+      </Box>
     </Center>
   );
 };
