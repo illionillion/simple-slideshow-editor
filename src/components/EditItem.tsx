@@ -43,7 +43,7 @@ const EditItem: FC<EditItemProps> = ({ item, setEditItems }) => {
     <ListItem h="2xs">
       <Center h="full">
         <Center flex={1} boxSize="fit-content">
-          <Image src={item.image && URL.createObjectURL(item.image)} />
+          <Image w="fit-content" src={item.image && URL.createObjectURL(item.image)} />
         </Center>
         <Center flex={1} flexDirection="column">
           <Input

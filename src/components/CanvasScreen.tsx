@@ -36,8 +36,6 @@ const CanvasScreen: FC<CanvasScreenProps> = ({ editItems, editItemsCount }) => {
     if (!editItems || editItems.length === 0 || editItemsCount === 0) return;
     const ctx: CanvasRenderingContext2D = getContext();
     ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-    ctx.fillStyle = "#fff";
-    ctx.fillRect(0, 0, canvasWidth, canvasHeight);
     const img = new Image();
     if (editItems[0].image) img.src = URL.createObjectURL(editItems[0].image);
     ctx.fillStyle = "#000";
@@ -45,8 +43,6 @@ const CanvasScreen: FC<CanvasScreenProps> = ({ editItems, editItemsCount }) => {
     img.onload = () => {
       ctx.fillStyle = "#000";
       ctx.fillRect(0, 0, canvasWidth, canvasHeight);
-      ctx.save();
-
       const { naturalWidth: imageWidth, naturalHeight: imageHeight } = img;
       reflectImage2Canvas(
         img,
@@ -100,11 +96,6 @@ const CanvasScreen: FC<CanvasScreenProps> = ({ editItems, editItemsCount }) => {
     for (let index = 0; index < imageElement.length; index++) {
       const { naturalWidth: imageWidth, naturalHeight: imageHeight } =
         imageElement[index];
-      console.log(imageWidth, imageHeight);
-
-      ctx.fillStyle = "#000";
-      ctx.fillRect(0, 0, canvasWidth, canvasHeight);
-      ctx.save();
 
       reflectImage2Canvas(
         imageElement[index],
@@ -166,6 +157,8 @@ const CanvasScreen: FC<CanvasScreenProps> = ({ editItems, editItemsCount }) => {
     const deltaParallelMoveX = previewAreaDomCenterX - resizedImageDomCenterX;
     const deltaParallelMoveY = previewAreaDomCenterY - resizedImageDomCenterY;
 
+    canvasDomContext.fillStyle = "#000";
+    canvasDomContext.fillRect(0, 0, canvasWidth, canvasHeight);
     canvasDomContext.drawImage(
       imageDom,
       deltaParallelMoveX,
