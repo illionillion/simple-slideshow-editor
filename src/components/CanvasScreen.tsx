@@ -1,13 +1,12 @@
-import { Box, Button, Center, Flex } from "@chakra-ui/react";
+import { Box, Button, Center, Flex, useDisclosure } from "@chakra-ui/react";
 import { FC, useEffect, useRef, useState } from "react";
+import ExportModal from "./ExportModal";
 import { editItemType } from "./TimecodeEditor";
 
 interface CanvasScreenProps {
   editItems: editItemType[] | undefined;
   editItemsCount: number;
 }
-// const width = 350;
-// const height = 200;
 const CanvasScreen: FC<CanvasScreenProps> = ({ editItems, editItemsCount }) => {
   const [canvasWidth, setCanvasWidth] = useState<number>(350);
   const [canvasHeight, setCanvasHeight] = useState<number>(200);
@@ -18,6 +17,11 @@ const CanvasScreen: FC<CanvasScreenProps> = ({ editItems, editItemsCount }) => {
     "init"
   );
   const [blobUrl, setBlobUrl] = useState<string>("");
+  const {
+    isOpen: isExportModalOpen,
+    onOpen: onExportModalOpen,
+    onClose: onExportModalClose,
+  } = useDisclosure();
   const getCanvas = (): HTMLCanvasElement => {
     const canvas: any = canvasRef.current;
 
@@ -39,7 +43,18 @@ const CanvasScreen: FC<CanvasScreenProps> = ({ editItems, editItemsCount }) => {
     ctx.fillStyle = "#000";
     ctx.fillRect(0, 0, canvasWidth, canvasHeight);
     img.onload = () => {
-      ctx.drawImage(img, 0, 0, canvasWidth, canvasHeight); //10, 10, 200, 50);
+      ctx.fillStyle = "#000";
+      ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+      ctx.save();
+
+      const { naturalWidth: imageWidth, naturalHeight: imageHeight } = img;
+      reflectImage2Canvas(
+        img,
+        imageWidth,
+        imageHeight,
+        canvasWidth,
+        canvasHeight
+      );
     };
     setImageElement((prev) =>
       prev
@@ -60,6 +75,7 @@ const CanvasScreen: FC<CanvasScreenProps> = ({ editItems, editItemsCount }) => {
     const timer = (sec: number) =>
       new Promise<void>((resolve) => setTimeout(() => resolve(), sec * 1000));
     const recorder = (() => {
+      onExportModalClose();
       //canvasの取得
       const canvas = getCanvas();
       //canvasからストリームを取得
@@ -82,14 +98,22 @@ const CanvasScreen: FC<CanvasScreenProps> = ({ editItems, editItemsCount }) => {
       recorder.start();
     }
     for (let index = 0; index < imageElement.length; index++) {
-      const {width: imageWidth, height: imageHeight} = imageElement[index]
-      console.dir(imageWidth, imageHeight);
-      const imageResized = imageResize(canvasWidth, imageHeight)
-      console.log(imageResized.width, imageResized.height);
+      const { naturalWidth: imageWidth, naturalHeight: imageHeight } =
+        imageElement[index];
+      console.log(imageWidth, imageHeight);
+
       ctx.fillStyle = "#000";
       ctx.fillRect(0, 0, canvasWidth, canvasHeight);
-      // ctx.drawImage(imageElement[index], 0, 0, canvasWidth, canvasHeight); //10, 10, 200, 50);
-      ctx.drawImage(imageElement[index], 0, 0, imageResized.width, imageResized.height); //10, 10, 200, 50);
+      ctx.save();
+
+      reflectImage2Canvas(
+        imageElement[index],
+        imageWidth,
+        imageHeight,
+        canvasWidth,
+        canvasHeight
+      );
+
       await timer(editItems[index].sec);
     }
 
@@ -98,67 +122,76 @@ const CanvasScreen: FC<CanvasScreenProps> = ({ editItems, editItemsCount }) => {
     setVideoState("canplay");
     if (isExport) {
       recorder.stop();
+      onExportModalOpen();
     }
   };
   const startExport = () => {
     animationStart(true);
   };
-  /**
-   * 描画する画像のリサイズ
-   * @param width 
-   * @param height 
-   * @returns 
-   */
-  const imageResize = (width:number, height:number) => {
-    let ScreenWidth = width
-    // 計算して出した縦幅
-    let ScreenHeight = (9 * ScreenWidth) / 16;
-    // 実際の縦幅
-    const windowHeight = height;
-  
-    // 計算した縦幅が実際の縦幅より大きい時
-    if (ScreenHeight > windowHeight) {
-        ScreenHeight = windowHeight;
-        // 計算した横幅を出す // 割り切れない時に誤差発生
-        ScreenWidth = (16 * ScreenHeight) / 9;
-        console.log("hoge");
+
+  const getOrientation = (imageDomWidth: number, imageDomHeight: number) => {
+    if (imageDomWidth > imageDomHeight) {
+      return `landscape`;
     }
+    return `portrait`;
+  };
 
-    return {width: ScreenWidth, height:ScreenHeight}
+  const reflectImage2Canvas = (
+    imageDom: HTMLImageElement,
+    imageDomWidth: number,
+    imageDomHeight: number,
+    previewAreaDomWidth: number,
+    previewAreaDomHeight: number
+  ) => {
+    const canvasDom = getCanvas();
+    const canvasDomContext = getContext();
+    const adjustedRatio = 0.85;
+    const ratio =
+      adjustedRatio *
+      (getOrientation(imageDomWidth, imageDomHeight) === `landscape`
+        ? previewAreaDomWidth / imageDomWidth
+        : previewAreaDomHeight / imageDomHeight);
 
-  }
+    canvasDom.width = previewAreaDomWidth;
+    canvasDom.height = previewAreaDomHeight;
+
+    const resizedImageDomWidth = imageDomWidth * ratio;
+    const resizedImageDomHeight = imageDomHeight * ratio;
+
+    const resizedImageDomCenterX = resizedImageDomWidth / 2;
+    const resizedImageDomCenterY = resizedImageDomHeight / 2;
+    const previewAreaDomCenterX = previewAreaDomWidth / 2;
+    const previewAreaDomCenterY = previewAreaDomHeight / 2;
+
+    const deltaParallelMoveX = previewAreaDomCenterX - resizedImageDomCenterX;
+    const deltaParallelMoveY = previewAreaDomCenterY - resizedImageDomCenterY;
+
+    canvasDomContext.drawImage(
+      imageDom,
+      deltaParallelMoveX,
+      deltaParallelMoveY,
+      imageDomWidth * ratio,
+      imageDomHeight * ratio
+    );
+    canvasDomContext.save();
+
+  };
   /**
    * canvasのリサイズ
    */
   const canvasResize = () => {
-    let ScreenWidth = (document.documentElement.clientWidth / 7) * 4
+    let ScreenWidth = (document.documentElement.clientWidth / 7) * 4;
     // 計算して出した縦幅
     let ScreenHeight = (9 * ScreenWidth) / 16;
     // 実際の縦幅
     const windowHeight = document.documentElement.clientHeight;
-  
+
     // 計算した縦幅が実際の縦幅より大きい時
     if (ScreenHeight > windowHeight) {
-        ScreenHeight = windowHeight;
-        // 計算した横幅を出す // 割り切れない時に誤差発生
-        ScreenWidth = (16 * ScreenHeight) / 9;
-        console.log("hoge");
-    }
-
-    /**
-     * 最大公約数を求める
-     * @param {number} w 横幅
-     * @param {number} h 高さ
-     * @returns {number}
-     */
-    function gcd(w:number, h: number):number {
-        if (h === 0) {
-            console.log('計算終了');
-            console.log(w);
-            return w;
-        }
-        console.log('計算中');
-        return gcd(h, w % h);
+      ScreenHeight = windowHeight;
+      // 計算した横幅を出す // 割り切れない時に誤差発生
+      ScreenWidth = (16 * ScreenHeight) / 9;
+      console.log("hoge");
     }
 
     const g = gcd(ScreenWidth, ScreenHeight);
@@ -166,14 +199,30 @@ const CanvasScreen: FC<CanvasScreenProps> = ({ editItems, editItemsCount }) => {
     // ここで比率を出したい // 2つの値の最大公約数を求めてそれで割る
     console.log(`${ScreenWidth} : ${ScreenHeight}`);
     console.log(`${ScreenWidth / g} : ${ScreenHeight / g}`);
-    setCanvasWidth(ScreenWidth)
-    setCanvasHeight(ScreenHeight)
-    checkItem()
+    setCanvasWidth(ScreenWidth);
+    setCanvasHeight(ScreenHeight);
+    checkItem();
+  };
+
+  /**
+   * 最大公約数を求める
+   * @param {number} w 横幅
+   * @param {number} h 高さ
+   * @returns {number}
+   */
+  const gcd = (w: number, h: number): number => {
+    if (h === 0) {
+      console.log("計算終了");
+      console.log(w);
+      return w;
+    }
+    console.log("計算中");
+    return gcd(h, w % h);
   };
   useEffect(() => {
-    canvasResize()
-    window.addEventListener('resize', canvasResize)
-  }, [])
+    canvasResize();
+    window.addEventListener("resize", canvasResize);
+  }, []);
   useEffect(checkItem, [editItems]);
   return (
     <Center w="full" h="full" flexDirection="column" ref={parentRef}>
@@ -208,21 +257,12 @@ const CanvasScreen: FC<CanvasScreenProps> = ({ editItems, editItemsCount }) => {
           エクスポート
         </Button>
       </Flex>
-      <Box>
-        {blobUrl !== "" ? (
-          <video
-            src={blobUrl}
-            controls
-            style={{
-              borderBlock: "solid",
-              borderWidth: 1,
-              borderColor: "#000",
-            }}
-          ></video>
-        ) : (
-          <></>
-        )}
-      </Box>
+      <ExportModal
+        blobUrl={blobUrl}
+        isOpen={isExportModalOpen}
+        onClose={onExportModalClose}
+        onOpen={() => {}}
+      />
     </Center>
   );
 };
