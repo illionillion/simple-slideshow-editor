@@ -36,21 +36,24 @@ const CanvasScreen: FC<CanvasScreenProps> = ({ editItems, editItemsCount }) => {
     const ctx: CanvasRenderingContext2D = getContext();
     ctx.clearRect(0, 0, canvasWidth, canvasHeight);
     const img = new Image();
-    if (editItems[0].image) img.src = URL.createObjectURL(editItems[0].image);
     ctx.fillStyle = "#000";
     ctx.fillRect(0, 0, canvasWidth, canvasHeight);
-    img.onload = () => {
-      ctx.fillStyle = "#000";
-      ctx.fillRect(0, 0, canvasWidth, canvasHeight);
-      const { naturalWidth: imageWidth, naturalHeight: imageHeight } = img;
-      reflectImage2Canvas(
+    if (editItems[0].image) {
+
+      img.src = URL.createObjectURL(editItems[0].image);
+      img.onload = () => {
+        ctx.fillStyle = "#000";
+        ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+        const { naturalWidth: imageWidth, naturalHeight: imageHeight } = img;
+        reflectImage2Canvas(
         img,
         imageWidth,
         imageHeight,
         canvasWidth,
         canvasHeight
-      );
-    };
+        );
+      };
+    }
     setImageElement((prev) =>
       prev
         ? editItems.map((item) => {
@@ -67,8 +70,19 @@ const CanvasScreen: FC<CanvasScreenProps> = ({ editItems, editItemsCount }) => {
     if (!imageElement || !editItems || videoState === "playing") return;
     setVideoState("playing");
     const ctx: CanvasRenderingContext2D = getContext();
-    const timer = (sec: number) =>
-      new Promise<void>((resolve) => setTimeout(() => resolve(), sec * 1000));
+    const timer = (s: number) =>
+      new Promise<void>((resolve) => {
+        const start_time = performance.now()
+        const timerid = setInterval(() => {
+          const current_time = performance.now();
+          const diff = current_time - start_time;
+          const sec = Math.floor(diff / 1000);
+          if (sec > s) {
+            resolve()
+            clearInterval(timerid)
+          }
+        }, 40)
+      });
     const recorder = (() => {
       onExportModalClose();
       //canvasの取得
