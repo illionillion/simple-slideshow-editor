@@ -11,7 +11,6 @@ const CanvasScreen: FC<CanvasScreenProps> = ({ editItems, editItemsCount }) => {
   const [canvasWidth, setCanvasWidth] = useState<number>(350);
   const [canvasHeight, setCanvasHeight] = useState<number>(200);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const parentRef = useRef<HTMLDivElement>(null);
   const [imageElement, setImageElement] = useState<HTMLImageElement[]>();
   const [videoState, setVideoState] = useState<"init" | "canplay" | "playing">(
     "init"
@@ -218,7 +217,7 @@ const CanvasScreen: FC<CanvasScreenProps> = ({ editItems, editItemsCount }) => {
   }, []);
   useEffect(checkItem, [editItems]);
   return (
-    <Center w="full" h="full" flexDirection="column" ref={parentRef}>
+    <Center w="full" h="full" flexDirection="column">
       <Box>
         <canvas
           width={canvasWidth}
