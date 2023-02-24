@@ -15,6 +15,7 @@ const CanvasScreen: FC<CanvasScreenProps> = ({ editItems, editItemsCount }) => {
   const [videoState, setVideoState] = useState<"init" | "canplay" | "playing">(
     "init"
   );
+  const [totalTime, setTotalTime] = useState<number>(0)
   const [blobUrl, setBlobUrl] = useState<string>("");
   const {
     isOpen: isExportModalOpen,
@@ -33,27 +34,8 @@ const CanvasScreen: FC<CanvasScreenProps> = ({ editItems, editItemsCount }) => {
   };
   const checkItem = () => {
     if (!editItems || editItems.length === 0 || editItemsCount === 0) return;
-    const ctx: CanvasRenderingContext2D = getContext();
-    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+    setTotalTime(editItems.reduce((prev, cuurent) => prev + cuurent.sec, 0)) // 合計時間
     const img = new Image();
-    ctx.fillStyle = "#000";
-    ctx.fillRect(0, 0, canvasWidth, canvasHeight);
-    if (editItems[0].image) {
-
-      img.src = URL.createObjectURL(editItems[0].image);
-      img.onload = () => {
-        ctx.fillStyle = "#000";
-        ctx.fillRect(0, 0, canvasWidth, canvasHeight);
-        const { naturalWidth: imageWidth, naturalHeight: imageHeight } = img;
-        reflectImage2Canvas(
-        img,
-        imageWidth,
-        imageHeight,
-        canvasWidth,
-        canvasHeight
-        );
-      };
-    }
     setImageElement((prev) =>
       prev
         ? editItems.map((item) => {
@@ -63,7 +45,7 @@ const CanvasScreen: FC<CanvasScreenProps> = ({ editItems, editItemsCount }) => {
           })
         : [img]
     );
-    ctx.save();
+    screenInit()
     setVideoState("canplay");
   };
   const animationStart = async (isExport: boolean) => {
@@ -207,8 +189,43 @@ const CanvasScreen: FC<CanvasScreenProps> = ({ editItems, editItemsCount }) => {
     console.log(`${ScreenWidth / g} : ${ScreenHeight / g}`);
     setCanvasWidth(ScreenWidth);
     setCanvasHeight(ScreenHeight);
-    checkItem();
+
+    // 別処理で描画
+    // screenInit()
   };
+
+  /**
+   * 画像追加・画面リサイズ時の画面初期化
+   */
+  const screenInit = () => {
+    const ctx: CanvasRenderingContext2D = getContext();
+    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+    const img = new Image();
+    ctx.fillStyle = "#000";
+    ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+    if (editItems && editItems[0].image) {
+
+      img.src = URL.createObjectURL(editItems[0].image);
+      img.onload = () => {
+        const { naturalWidth: imageWidth, naturalHeight: imageHeight } = img;
+        reflectImage2Canvas(
+          img,
+          imageWidth,
+          imageHeight,
+          canvasWidth,
+          canvasHeight
+          );
+        };
+      }
+       else {
+        ctx.fillStyle = "#000";
+        ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+    }
+  }
+
+  useEffect(()=>{
+    if (videoState !== 'playing') screenInit()
+  },[canvasWidth, canvasHeight])
 
   /**
    * 最大公約数を求める
