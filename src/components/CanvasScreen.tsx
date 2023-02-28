@@ -3,6 +3,11 @@ import {
   Button,
   Center,
   Flex,
+  Slider,
+  SliderFilledTrack,
+  SliderMark,
+  SliderTrack,
+  Spinner,
   useBoolean,
   useDisclosure,
 } from "@chakra-ui/react";
@@ -23,7 +28,6 @@ const CanvasScreen: FC<CanvasScreenProps> = ({ editItems, editItemsCount }) => {
     "init"
   );
   const [timerId, setTimerId] = useState<NodeJS.Timer>();
-  const [currentTime, setCurrentTime] = useState<number>(0);
   const [calcTime, setCalcTime] = useState<number>(0);
   const [displayTime, setDisplayTime] = useState<number>(0);
   const [timeCode, setTimeCode] = useState<{ start: number; end: number }[]>(
@@ -35,6 +39,11 @@ const CanvasScreen: FC<CanvasScreenProps> = ({ editItems, editItemsCount }) => {
     isOpen: isExportModalOpen,
     onOpen: onExportModalOpen,
     onClose: onExportModalClose,
+  } = useDisclosure();
+  const {
+    isOpen: isSpinnerOpen,
+    onOpen: onSpinnerOpen,
+    onClose: onSpinnerClose,
   } = useDisclosure();
   const [isExport, setIsExpoort] = useBoolean(false);
   const getCanvas = (): HTMLCanvasElement => {
@@ -65,7 +74,8 @@ const CanvasScreen: FC<CanvasScreenProps> = ({ editItems, editItemsCount }) => {
   const checkItem = () => {
     if (!editItems || editItems.length === 0 || editItemsCount === 0) return;
     setTotalTime(editItems.reduce((prev, cuurent) => prev + cuurent.sec, 0)); // 合計時間
-    setDisplayTime(0)
+    setDisplayTime(0);
+    screenInit();
     // タイムコード
     setTimeCode(
       editItems.map((item, index1, arr) => {
@@ -143,8 +153,8 @@ const CanvasScreen: FC<CanvasScreenProps> = ({ editItems, editItemsCount }) => {
             (item) => item.start <= sec && sec < item.end
           );
           console.log(sec);
-          console.log(timeCode);
-          console.log(index);
+          // console.log(timeCode);
+          // console.log(index);
 
           if (imageElement && index > -1) {
             const { naturalWidth: imageWidth, naturalHeight: imageHeight } =
@@ -164,7 +174,6 @@ const CanvasScreen: FC<CanvasScreenProps> = ({ editItems, editItemsCount }) => {
             // 終了
             clearTimeout(timer);
             setTimerId(undefined);
-            setCalcTime(0);
             ctx.fillRect(0, 0, canvasWidth, canvasHeight);
             ctx.save();
             setVideoState("canplay");
@@ -172,6 +181,7 @@ const CanvasScreen: FC<CanvasScreenProps> = ({ editItems, editItemsCount }) => {
               recorder.stop();
               onExportModalOpen();
               setIsExpoort.off();
+              onSpinnerClose();
             }
           }
         }, 40);
@@ -179,7 +189,6 @@ const CanvasScreen: FC<CanvasScreenProps> = ({ editItems, editItemsCount }) => {
 
         break;
       case "canplay":
-
         // screenInit();
         break;
     }
@@ -187,18 +196,21 @@ const CanvasScreen: FC<CanvasScreenProps> = ({ editItems, editItemsCount }) => {
   const animationStart = () => {
     setVideoState("playing");
     setDisplayTime(0);
+    setCalcTime(0);
   };
   const startExport = () => {
     setIsExpoort.on();
+    onSpinnerOpen();
     animationStart();
   };
   const onStop = () => {
     setVideoState("canplay");
     setDisplayTime(0);
-    setCalcTime(0)
+    setCalcTime(0);
+    onSpinnerClose();
     clearTimeout(timerId);
     setTimerId(undefined);
-  }
+  };
 
   const getOrientation = (imageDomWidth: number, imageDomHeight: number) => {
     if (imageDomWidth > imageDomHeight) {
@@ -273,9 +285,6 @@ const CanvasScreen: FC<CanvasScreenProps> = ({ editItems, editItemsCount }) => {
     console.log(`${ScreenWidth / g} : ${ScreenHeight / g}`);
     setCanvasWidth(ScreenWidth);
     setCanvasHeight(ScreenHeight);
-
-    // 別処理で描画
-    // screenInit()
   };
 
   /**
@@ -331,7 +340,23 @@ const CanvasScreen: FC<CanvasScreenProps> = ({ editItems, editItemsCount }) => {
   useEffect(checkItem, [editItems]);
   return (
     <Center w="full" h="full" flexDirection="column">
-      <Box>
+      <Box position="relative">
+        {isSpinnerOpen && (
+          <Center
+            position="absolute"
+            width="full"
+            height="full"
+            flexDir="column"
+          >
+            <Spinner
+              thickness="4px"
+              speed="0.65s"
+              emptyColor="gray.200"
+              color="blue.500"
+              size="xl"
+            />
+          </Center>
+        )}
         <canvas
           width={canvasWidth}
           height={canvasHeight}
@@ -339,8 +364,42 @@ const CanvasScreen: FC<CanvasScreenProps> = ({ editItems, editItemsCount }) => {
           style={{ borderBlock: "solid", borderWidth: 1, borderColor: "#000" }}
         ></canvas>
       </Box>
-      <Box>{displayTime + "/" + totalTime}</Box>
-      <Flex>
+      <Center width="full" height="10px">
+        {(() => {
+          const sec = Math.floor((calcTime / 1000) * 100) / 100;
+          console.log(sec);
+
+          // const percent = Math.floor((sec) * 100) / 100;
+          return (
+            <Slider
+              aria-label="time-label"
+              defaultValue={0}
+              min={0}
+              max={totalTime}
+              value={sec}
+            >
+              <SliderTrack>
+                <SliderFilledTrack />
+              </SliderTrack>
+              {videoState === "playing" ? (
+                <SliderMark
+                  value={sec}
+                  textAlign="center"
+                  bg="blue.500"
+                  color="white"
+                  mt={1}
+                  w={12}
+                >
+                  {displayTime} / {totalTime}
+                </SliderMark>
+              ) : (
+                <></>
+              )}
+            </Slider>
+          );
+        })()}
+      </Center>
+      <Flex margin="24px auto 0px auto">
         <Button
           isDisabled={(() => {
             switch (videoState) {
