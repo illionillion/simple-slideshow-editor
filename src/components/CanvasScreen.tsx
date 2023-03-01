@@ -109,7 +109,7 @@ const CanvasScreen: FC<CanvasScreenProps> = ({ editItems, editItemsCount }) => {
     setVideoState("canplay");
   };
 
-  useEffect(() => {
+  const onStateChange = () => {
     switch (videoState) {
       case "init":
         break;
@@ -192,7 +192,8 @@ const CanvasScreen: FC<CanvasScreenProps> = ({ editItems, editItemsCount }) => {
         // screenInit();
         break;
     }
-  }, [videoState]);
+  };
+  useEffect(onStateChange, [videoState]);
   const animationStart = () => {
     setVideoState("playing");
     setDisplayTime(0);
@@ -369,7 +370,6 @@ const CanvasScreen: FC<CanvasScreenProps> = ({ editItems, editItemsCount }) => {
           const sec = Math.floor((calcTime / 1000) * 100) / 100;
           console.log(sec);
 
-          // const percent = Math.floor((sec) * 100) / 100;
           return (
             <Slider
               aria-label="time-label"
