@@ -25,13 +25,13 @@ const TimecodeEditor:FC<TimecodeEditorProps> = ({editItems,editItemsCount,setEdi
     );
   };
   return (
-    <Flex direction="column" h="full">
+    <Flex direction="column" h="full" borderLeft="1px">
       <List overflowY="scroll" h="full">
         {editItems?.map((item, index) => (
-          <EditItem key={index} item={item} setEditItems={setEditItems} />
+          <EditItem key={index} item={item} setEditItems={setEditItems}/>
         ))}
       </List>
-      <Center w="full" h="16" minH={16}>
+      <Center w="full" h="16" minH={16} borderTop="1px">
         <Button w="16" h="10" minH={10} m="auto" onClick={addEditorItem}>
           追加
         </Button>

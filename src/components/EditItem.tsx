@@ -1,4 +1,4 @@
-import { Box, Center, Image, Input, ListItem, Text } from "@chakra-ui/react";
+import { Center, Image, Input, ListItem, Text } from "@chakra-ui/react";
 import { ChangeEvent, Dispatch, FC, SetStateAction } from "react";
 import { editItemType } from "./TimecodeEditor";
 
@@ -40,7 +40,7 @@ const EditItem: FC<EditItemProps> = ({ item, setEditItems }) => {
     );
   };
   return (
-    <ListItem h="2xs">
+    <ListItem h="2xs" borderBottom="1px">
       <Center h="full">
         <Center flex={1} h="full">
           { item.image ? <Image w="fit-content" src={item.image && URL.createObjectURL(item.image)} /> : <Center w="full" h="50%" bg="gray">No Image</Center>}
@@ -51,6 +51,8 @@ const EditItem: FC<EditItemProps> = ({ item, setEditItems }) => {
             accept="image/*"
             placeholder="画像ファイルを選択"
             onChange={(e) => editImage(e)}
+            height="auto"
+            padding={1}
           />
           <Center>
             <Input
