@@ -109,91 +109,99 @@ const CanvasScreen: FC<CanvasScreenProps> = ({ editItems, editItemsCount }) => {
     setVideoState("canplay");
   };
 
+  /**
+   * 状態変更時
+   */
   const onStateChange = () => {
     switch (videoState) {
       case "init":
         break;
       case "playing":
-        const ctx: CanvasRenderingContext2D = getContext();
-        const recorder = (() => {
-          onExportModalClose();
-          //canvasの取得
-          const canvas = getCanvas();
-          //canvasからストリームを取得
-          const stream = canvas.captureStream();
-          //ストリームからMediaRecorderを生成
-          const recorder = new MediaRecorder(stream, {
-            mimeType: "video/webm;codecs=vp9",
-          });
-          return recorder;
-        })();
-        if (isExport) {
-          //ダウンロード用のリンクを準備
-          //録画終了時に動画ファイルのダウンロードリンクを生成する処理
-          recorder.ondataavailable = function (e) {
-            const videoBlob = new Blob([e.data], { type: e.data.type });
-            const blob_Url = window.URL.createObjectURL(videoBlob);
-            setBlobUrl(blob_Url);
-          };
-          //録画開始
-          recorder.start();
-        }
-
-        const start_time = performance.now() - calcTime; // 開始時間
-        const timer = setInterval(() => {
-          const current_time = performance.now(); // 終了時間
-          const diff = current_time - start_time;
-          setCalcTime(diff);
-          // const sec = Math.floor((diff / 1000) * 100) / 100; // もし秒：m秒にするなら
-          const sec = Math.floor(diff / 1000);
-
-          // 描画する画像を選んで描画処理
-          // 現在時刻がどの画像かを計算する
-          const index = timeCode.findIndex(
-            (item) => item.start <= sec && sec < item.end
-          );
-          console.log(sec);
-          // console.log(timeCode);
-          // console.log(index);
-
-          if (imageElement && index > -1) {
-            const { naturalWidth: imageWidth, naturalHeight: imageHeight } =
-              imageElement[index];
-
-            reflectImage2Canvas(
-              imageElement[index],
-              imageWidth,
-              imageHeight,
-              canvasWidth,
-              canvasHeight
-            );
-          }
-
-          if (displayTime < sec) setDisplayTime(sec); // 表示時間更新
-          if (sec >= totalTime) {
-            // 終了
-            clearTimeout(timer);
-            setTimerId(undefined);
-            ctx.fillRect(0, 0, canvasWidth, canvasHeight);
-            ctx.save();
-            setVideoState("canplay");
-            if (isExport) {
-              recorder.stop();
-              onExportModalOpen();
-              setIsExpoort.off();
-              onSpinnerClose();
-            }
-          }
-        }, 40);
-        setTimerId(timer);
-
+        onPlaying();
         break;
       case "canplay":
         // screenInit();
         break;
     }
   };
-  useEffect(onStateChange, [videoState]);
+  const onPlaying = () => {
+    try {
+      const ctx: CanvasRenderingContext2D = getContext();
+      const recorder = (() => {
+        onExportModalClose();
+        //canvasの取得
+        const canvas = getCanvas();
+        //canvasからストリームを取得
+        const stream = canvas.captureStream();
+        //ストリームからMediaRecorderを生成
+        const recorder = new MediaRecorder(stream, {
+          mimeType: "video/webm;codecs=vp9",
+        });
+        return recorder;
+      })();
+      if (isExport) {
+        //ダウンロード用のリンクを準備
+        //録画終了時に動画ファイルのダウンロードリンクを生成する処理
+        recorder.ondataavailable = function (e) {
+          const videoBlob = new Blob([e.data], { type: e.data.type });
+          const blob_Url = window.URL.createObjectURL(videoBlob);
+          setBlobUrl(blob_Url);
+        };
+        //録画開始
+        recorder.start();
+      }
+
+      const start_time = performance.now() - calcTime; // 開始時間
+      const timer = setInterval(() => {
+        const current_time = performance.now(); // 終了時間
+        const diff = current_time - start_time;
+        setCalcTime(diff);
+        // const sec = Math.floor((diff / 1000) * 100) / 100; // もし秒：m秒にするなら
+        const sec = Math.floor(diff / 1000);
+
+        // 描画する画像を選んで描画処理
+        // 現在時刻がどの画像かを計算する
+        const index = timeCode.findIndex(
+          (item) => item.start <= sec && sec < item.end
+        );
+        console.log(sec);
+        // console.log(timeCode);
+        // console.log(index);
+
+        if (imageElement && index > -1) {
+          const { naturalWidth: imageWidth, naturalHeight: imageHeight } =
+            imageElement[index];
+
+          reflectImage2Canvas(
+            imageElement[index],
+            imageWidth,
+            imageHeight,
+            canvasWidth,
+            canvasHeight
+          );
+        }
+
+        if (displayTime < sec) setDisplayTime(sec); // 表示時間更新
+        if (sec >= totalTime) {
+          // 終了
+          clearTimeout(timer);
+          setTimerId(undefined);
+          ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+          ctx.save();
+          setVideoState("canplay");
+          if (isExport) {
+            recorder.stop();
+            onExportModalOpen();
+            setIsExpoort.off();
+            onSpinnerClose();
+          }
+        }
+      }, 40);
+      setTimerId(timer);
+    } catch (error) {
+      console.error(error);
+    }
+  };
   const animationStart = () => {
     setVideoState("playing");
     setDisplayTime(0);
@@ -315,10 +323,6 @@ const CanvasScreen: FC<CanvasScreenProps> = ({ editItems, editItemsCount }) => {
     }
   };
 
-  useEffect(() => {
-    if (videoState !== "playing") screenInit();
-  }, [canvasWidth, canvasHeight]);
-
   /**
    * 最大公約数を求める
    * @param {number} w 横幅
@@ -334,6 +338,12 @@ const CanvasScreen: FC<CanvasScreenProps> = ({ editItems, editItemsCount }) => {
     console.log("計算中");
     return gcd(h, w % h);
   };
+
+  // useEffects
+  useEffect(onStateChange, [videoState]);
+  useEffect(() => {
+    if (videoState !== "playing") screenInit();
+  }, [canvasWidth, canvasHeight]);
   useEffect(() => {
     canvasResize();
     window.addEventListener("resize", canvasResize);

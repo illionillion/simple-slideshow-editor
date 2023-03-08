@@ -7,7 +7,7 @@ function App() {
   const [editItems, setEditItems] = useState<editItemType[]>();
   const [editItemsCount, setEditItemsCount] = useState<number>(0);
   return (
-    <Center className="App" w="100vw" h="100vh">
+    <Center className="App" w="100vw" h="100vh" border="1px">
       <Box flex={4} h="full">
         <CanvasScreen editItems={editItems} editItemsCount={editItemsCount} />
       </Box>
