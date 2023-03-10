@@ -1,7 +1,7 @@
-import { Box, Button, Center, Flex, List } from "@chakra-ui/react";
+import { Button, Center, Flex, List } from "@chakra-ui/react";
 import { Dispatch, FC, SetStateAction } from "react";
 import EditItem from "./EditItem";
-
+import { Reorder } from "framer-motion";
 export interface editItemType {
   no: number;
   sec: number;
@@ -9,13 +9,17 @@ export interface editItemType {
 }
 
 interface TimecodeEditorProps {
-  editItems: editItemType[] | undefined
-  setEditItems: Dispatch<SetStateAction<editItemType[] | undefined>>
-  editItemsCount: number
-  setEditItemsCount: Dispatch<SetStateAction<number>>
+  editItems: editItemType[] | undefined;
+  setEditItems: Dispatch<SetStateAction<editItemType[] | undefined>>;
+  editItemsCount: number;
+  setEditItemsCount: Dispatch<SetStateAction<number>>;
 }
-const TimecodeEditor:FC<TimecodeEditorProps> = ({editItems,editItemsCount,setEditItems,setEditItemsCount}) => {
-
+const TimecodeEditor: FC<TimecodeEditorProps> = ({
+  editItems,
+  editItemsCount,
+  setEditItems,
+  setEditItemsCount,
+}) => {
   const addEditorItem = () => {
     setEditItemsCount((prev) => prev + 1);
     setEditItems((prev) =>
@@ -27,9 +31,13 @@ const TimecodeEditor:FC<TimecodeEditorProps> = ({editItems,editItemsCount,setEdi
   return (
     <Flex direction="column" h="full" borderLeft="1px">
       <List overflowY="scroll" h="full">
-        {editItems?.map((item, index) => (
-          <EditItem key={index} item={item} setEditItems={setEditItems}/>
-        ))}
+        <Reorder.Group values={editItems ?? []} onReorder={setEditItems}>
+          {editItems?.map((item, index) => (
+            <Reorder.Item key={index} value={item}>
+              <EditItem item={item} setEditItems={setEditItems} />
+            </Reorder.Item>
+          ))}
+        </Reorder.Group>
       </List>
       <Center w="full" h="16" minH={16} borderTop="1px">
         <Button w="16" h="10" minH={10} m="auto" onClick={addEditorItem}>
