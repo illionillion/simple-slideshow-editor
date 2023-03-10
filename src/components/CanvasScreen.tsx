@@ -1,4 +1,10 @@
 import {
+  AlertDialog,
+  AlertDialogBody,
+  AlertDialogContent,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogOverlay,
   Box,
   Button,
   Center,
@@ -23,6 +29,7 @@ const CanvasScreen: FC<CanvasScreenProps> = ({ editItems, editItemsCount }) => {
   const [canvasWidth, setCanvasWidth] = useState<number>(350);
   const [canvasHeight, setCanvasHeight] = useState<number>(200);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const closeRef = useRef<HTMLButtonElement>(null);
   const [imageElement, setImageElement] = useState<HTMLImageElement[]>();
   const [videoState, setVideoState] = useState<"init" | "canplay" | "playing">(
     "init"
@@ -40,6 +47,13 @@ const CanvasScreen: FC<CanvasScreenProps> = ({ editItems, editItemsCount }) => {
     onOpen: onExportModalOpen,
     onClose: onExportModalClose,
   } = useDisclosure();
+  const {
+    isOpen: isAlertOpen,
+    onOpen: onAlertOpen,
+    onClose: onAlertClose,
+  } = useDisclosure();
+  const [alertTitle, setAlertTitle] = useState<string>("");
+  const [alertMessage, setAlertMessage] = useState<string>("");
   const {
     isOpen: isSpinnerOpen,
     onOpen: onSpinnerOpen,
@@ -199,7 +213,12 @@ const CanvasScreen: FC<CanvasScreenProps> = ({ editItems, editItemsCount }) => {
       }, 40);
       setTimerId(timer);
     } catch (error) {
-      console.error(error);
+      // console.error(error);
+      console.log(error);
+      setAlertTitle("アラート")
+      setAlertMessage("お使いの端末・ブラウザはサポートされておりません。")
+      onAlertOpen()
+      onStop()
     }
   };
   const animationStart = () => {
@@ -438,6 +457,30 @@ const CanvasScreen: FC<CanvasScreenProps> = ({ editItems, editItemsCount }) => {
         onClose={onExportModalClose}
         onOpen={() => {}}
       />
+      <AlertDialog
+        isOpen={isAlertOpen}
+        leastDestructiveRef={closeRef}
+        onClose={onAlertClose}
+        isCentered
+      >
+        <AlertDialogOverlay>
+          <AlertDialogContent>
+            <AlertDialogHeader fontSize='lg' fontWeight='bold'>
+              {alertTitle}
+            </AlertDialogHeader>
+
+            <AlertDialogBody>
+              {alertMessage}
+            </AlertDialogBody>
+
+            <AlertDialogFooter>
+              <Button ref={closeRef} onClick={onAlertClose}>
+                閉じる
+              </Button>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialogOverlay>
+      </AlertDialog>
     </Center>
   );
 };
