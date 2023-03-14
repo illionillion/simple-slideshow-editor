@@ -33,22 +33,12 @@ const TimecodeEditor: FC<TimecodeEditorProps> = ({
       <Reorder.Group
         values={editItems ?? []}
         onReorder={setEditItems}
-        style={{ overflowY: "scroll", height: "100%" }}
+        style={{ overflowY: "scroll", height: "100%", position:"relative" }}
         axis="y"
+        layoutScroll
       >
         {editItems?.map((item, index) => (
-          <Reorder.Item
-            key={index}
-            value={item}
-            style={{
-              width: "95%",
-              height: "30%",
-              margin: "auto auto 5px auto",
-              listStyleType: "none",
-            }}
-          >
-            <EditItem item={item} setEditItems={setEditItems} />
-          </Reorder.Item>
+          <EditItem item={item} key={index} setEditItems={setEditItems} />
         ))}
       </Reorder.Group>
       <Center w="full" h="16" minH={16} borderTop="1px">
