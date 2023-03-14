@@ -10,17 +10,14 @@ import {
 import { ChangeEvent, Dispatch, FC, SetStateAction } from "react";
 import { editItemType } from "./TimecodeEditor";
 import {
-  DragControls,
   Reorder,
   useDragControls,
-  useMotionValue,
 } from "framer-motion";
 import { DragHandleIcon } from "@chakra-ui/icons";
 
 interface EditItemProps {
   item: editItemType | undefined;
   setEditItems: Dispatch<SetStateAction<editItemType[] | undefined>>;
-  // controls: DragControls;
 }
 const EditItem: FC<EditItemProps> = ({ item, setEditItems, }) => {
   const controls = useDragControls();
@@ -42,7 +39,6 @@ const EditItem: FC<EditItemProps> = ({ item, setEditItems, }) => {
   const editImage = (e: ChangeEvent<HTMLInputElement>) => {
     console.log(e.target.files);
     if (e.target.files === null || e.target.files.length === 0) return;
-    // console.log(e.target.files[0]);
     const file = e.target.files[0];
     setEditItems((prev) =>
       prev?.map((edit) =>

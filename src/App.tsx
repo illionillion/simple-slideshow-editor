@@ -3,14 +3,9 @@ import { useState } from "react";
 import "./App.css";
 import CanvasScreen from "./components/CanvasScreen";
 import TimecodeEditor, { editItemType } from "./components/TimecodeEditor";
-import { useEffect } from "react";
 function App() {
   const [editItems, setEditItems] = useState<editItemType[]>();
   const [editItemsCount, setEditItemsCount] = useState<number>(0);
-  useEffect(() => {
-    console.log(JSON.stringify(editItems));
-    
-  }, [editItems]);
   return (
     <Center className="App" w="100vw" h="100vh" border="1px">
       <Box flex={4} h="full">

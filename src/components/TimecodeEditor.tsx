@@ -1,7 +1,7 @@
-import { Button, Center, Flex, List, ListItem } from "@chakra-ui/react";
-import { Dispatch, FC, SetStateAction, useEffect, useState } from "react";
+import { Button, Center, Flex, List } from "@chakra-ui/react";
+import { Dispatch, FC, SetStateAction } from "react";
 import EditItem from "./EditItem";
-import { Reorder, useDragControls } from "framer-motion";
+import { Reorder } from "framer-motion";
 export interface editItemType {
   no: number;
   sec: number;
@@ -28,10 +28,6 @@ const TimecodeEditor: FC<TimecodeEditorProps> = ({
         : [{ no: editItemsCount, sec: 1, image: undefined }]
     );
   };
-  const [reorderList, setReorderList] = useState(editItems?.map(i => i.no))
-  useEffect(()=>{
-    setReorderList(editItems?.map(i => i.no))
-  },[editItems])
   return (
     <Flex direction="column" h="full" borderLeft="1px">
       <List
@@ -43,16 +39,8 @@ const TimecodeEditor: FC<TimecodeEditorProps> = ({
         overflow="scroll"
         h="full"
       >
-        {editItems?.map((val, index) => (
-          
-            <EditItem
-              // item={editItems?.find(i => i.no === val)}
-              key={index}
-              item={val}
-              setEditItems={setEditItems}
-              // controls={controls}
-            />
-          // </ListItem>
+        {editItems?.map((val) => (
+          <EditItem key={val.no} item={val} setEditItems={setEditItems} />
         ))}
       </List>
       <Center w="full" h="16" minH={16} borderTop="1px">
