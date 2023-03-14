@@ -9,20 +9,25 @@ import {
 } from "@chakra-ui/react";
 import { ChangeEvent, Dispatch, FC, SetStateAction } from "react";
 import { editItemType } from "./TimecodeEditor";
-import { Reorder, useDragControls, useMotionValue } from "framer-motion";
+import {
+  DragControls,
+  Reorder,
+  useDragControls,
+  useMotionValue,
+} from "framer-motion";
 import { DragHandleIcon } from "@chakra-ui/icons";
 
 interface EditItemProps {
-  item: editItemType;
+  item: editItemType | undefined;
   setEditItems: Dispatch<SetStateAction<editItemType[] | undefined>>;
+  // controls: DragControls;
 }
-const EditItem: FC<EditItemProps> = ({ item, setEditItems }) => {
+const EditItem: FC<EditItemProps> = ({ item, setEditItems, }) => {
   const controls = useDragControls();
-  const y = useMotionValue(0);
   const editTime = (e: ChangeEvent<HTMLInputElement>) => {
     setEditItems((prev) =>
       prev?.map((edit) =>
-        edit.no === item.no
+        edit.no === item?.no
           ? {
               no: edit.no,
               sec: isNaN(parseInt(e.target.value))
@@ -41,7 +46,7 @@ const EditItem: FC<EditItemProps> = ({ item, setEditItems }) => {
     const file = e.target.files[0];
     setEditItems((prev) =>
       prev?.map((edit) =>
-        edit.no === item.no
+        edit.no === item?.no
           ? {
               no: edit.no,
               sec: edit.sec,
@@ -52,27 +57,22 @@ const EditItem: FC<EditItemProps> = ({ item, setEditItems }) => {
     );
   };
   return (
-    <Reorder.Item
-      value={item}
-      id={item.no.toString()}
+    <ListItem
+      as={Reorder.Item}
+      value={item as unknown as string}
       dragListener={false}
-      draggable={false}
       dragControls={controls}
-      style={{
-        width: "95%",
-        height: "30%",
-        margin: "auto auto 10px auto",
-        listStyleType: "none",
-        userSelect: "none",
-        position: "relative",
-        y,
-      }}
+      w="95%"
+      h="30%"
+      m="auto auto 10px auto"
+      listStyleType="none"
+      userSelect="none"
     >
       <Card h="full" border="1px">
         <CardBody>
           <Center h="full">
             <Center flex={1} h="full" position="relative" bg="#000">
-              {item.image ? (
+              {item?.image ? (
                 <Image
                   w="auto"
                   height="auto"
@@ -120,18 +120,21 @@ const EditItem: FC<EditItemProps> = ({ item, setEditItems }) => {
                   type="number"
                   min={1}
                   placeholder="n"
-                  value={item.sec}
+                  value={item?.sec}
                   onChange={(e) => editTime(e)}
-                  
                 />
                 <Text>秒</Text>
               </Center>
             </Center>
-            <DragHandleIcon onPointerDown={(e) => controls.start(e)} cursor="grab" boxSize="9" />
+            <DragHandleIcon
+              onPointerDown={(e) => controls.start(e)}
+              cursor="grab"
+              boxSize="9"
+            />
           </Center>
         </CardBody>
       </Card>
-    </Reorder.Item>
+    </ListItem>
   );
 };
 
