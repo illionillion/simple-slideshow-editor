@@ -6,20 +6,19 @@ import {
   Input,
   ListItem,
   Text,
+  useBoolean,
 } from "@chakra-ui/react";
 import { ChangeEvent, Dispatch, FC, SetStateAction } from "react";
 import { editItemType } from "./TimecodeEditor";
-import {
-  Reorder,
-  useDragControls,
-} from "framer-motion";
+import { Reorder, useDragControls } from "framer-motion";
 import { DragHandleIcon } from "@chakra-ui/icons";
 
 interface EditItemProps {
   item: editItemType | undefined;
   setEditItems: Dispatch<SetStateAction<editItemType[] | undefined>>;
 }
-const EditItem: FC<EditItemProps> = ({ item, setEditItems, }) => {
+const EditItem: FC<EditItemProps> = ({ item, setEditItems }) => {
+  const [isDragListener, setIsDragListener] = useBoolean(false);
   const controls = useDragControls();
   const editTime = (e: ChangeEvent<HTMLInputElement>) => {
     setEditItems((prev) =>
@@ -56,7 +55,7 @@ const EditItem: FC<EditItemProps> = ({ item, setEditItems, }) => {
     <ListItem
       as={Reorder.Item}
       value={item as unknown as string}
-      dragListener={false}
+      dragListener={isDragListener}
       dragControls={controls}
       w="95%"
       h="30%"
@@ -123,7 +122,11 @@ const EditItem: FC<EditItemProps> = ({ item, setEditItems, }) => {
               </Center>
             </Center>
             <DragHandleIcon
-              onPointerDown={(e) => controls.start(e)}
+              onPointerDown={(e) => {
+                setIsDragListener.on();
+                controls.start(e);
+              }}
+              onPointerUp={() => setIsDragListener.off()}
               cursor="grab"
               boxSize="9"
             />
