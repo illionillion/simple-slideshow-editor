@@ -30,27 +30,19 @@ const TimecodeEditor: FC<TimecodeEditorProps> = ({
   };
   return (
     <Flex direction="column" h="full" borderLeft="1px">
-      <Reorder.Group
+      <List
+        as={Reorder.Group}
         values={editItems ?? []}
         onReorder={setEditItems}
-        style={{ overflowY: "scroll", height: "100%" }}
         axis="y"
+        layoutScroll
+        overflow="scroll"
+        h="full"
       >
-        {editItems?.map((item, index) => (
-          <Reorder.Item
-            key={index}
-            value={item}
-            style={{
-              width: "95%",
-              height: "30%",
-              margin: "auto auto 5px auto",
-              listStyleType: "none",
-            }}
-          >
-            <EditItem item={item} setEditItems={setEditItems} />
-          </Reorder.Item>
+        {editItems?.map((val) => (
+          <EditItem key={val.no} item={val} setEditItems={setEditItems} />
         ))}
-      </Reorder.Group>
+      </List>
       <Center w="full" h="16" minH={16} borderTop="1px">
         <Button w="16" h="10" minH={10} m="auto" onClick={addEditorItem}>
           追加

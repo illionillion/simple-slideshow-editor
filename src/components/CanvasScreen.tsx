@@ -397,7 +397,7 @@ const CanvasScreen: FC<CanvasScreenProps> = ({ editItems, editItemsCount }) => {
       <Center width="full" height="10px">
         {(() => {
           const sec = Math.floor((calcTime / 1000) * 100) / 100;
-          console.log(sec);
+          // console.log(sec);
 
           return (
             <Slider
