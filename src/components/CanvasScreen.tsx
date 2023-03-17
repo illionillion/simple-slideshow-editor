@@ -224,6 +224,7 @@ const CanvasScreen: FC<CanvasScreenProps> = ({ editItems, editItemsCount }) => {
       setAlertMessage("お使いの端末・ブラウザはサポートされておりません。");
       onAlertOpen();
       onStop();
+      setIsExpoort.off();
     }
   };
   const animationStart = () => {
