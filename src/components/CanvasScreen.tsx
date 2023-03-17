@@ -151,9 +151,9 @@ const CanvasScreen: FC<CanvasScreenProps> = ({ editItems, editItemsCount }) => {
         const recorder = new MediaRecorder(stream, {
           mimeType: "video/webm;codecs=vp9",
         });
-        return recorder;
+        return isExport ? recorder : undefined;
       })();
-      if (isExport) {
+      if (isExport && recorder) {
         //ダウンロード用のリンクを準備
         //録画終了時に動画ファイルのダウンロードリンクを生成する処理
         recorder.ondataavailable = function (e) {
@@ -203,7 +203,7 @@ const CanvasScreen: FC<CanvasScreenProps> = ({ editItems, editItemsCount }) => {
           ctx.fillRect(0, 0, canvasWidth, canvasHeight);
           ctx.save();
           setVideoState("canplay");
-          if (isExport) {
+          if (isExport && recorder) {
             recorder.stop();
             onExportModalOpen();
             setIsExpoort.off();
