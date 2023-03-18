@@ -24,18 +24,19 @@ function App() {
       flexDirection={isWide ? "row" : "column"}
     >
       <Box
-        flex={4}
-        h={isWide ? "full" : "30vh"}
+        flex={isWide ? 4 : 2}
+        h={"full"}
         w={isWide ? "auto" : "full"}
         borderBottom="1px"
       >
         <CanvasScreen editItems={editItems} editItemsCount={editItemsCount} />
       </Box>
       <Box
-        flex={3}
-        h={isWide ? "full" : "600px"}
+        flex={isWide ? 3 : 5}
+        h={"full"}
         w={isWide ? "auto" : "full"}
         paddingTop="10px"
+        overflow="hidden"
       >
         <TimecodeEditor
           editItems={editItems}
