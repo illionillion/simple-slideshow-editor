@@ -58,7 +58,7 @@ const EditItem: FC<EditItemProps> = ({ item, setEditItems }) => {
       dragListener={isDragListener}
       dragControls={controls}
       w="95%"
-      h="30%"
+      h="40%"
       m="auto auto 10px auto"
       listStyleType="none"
       userSelect="none"

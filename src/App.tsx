@@ -1,5 +1,5 @@
 import { Box, Center, useMediaQuery } from "@chakra-ui/react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import "./App.css";
 import CanvasScreen from "./components/CanvasScreen";
 import TimecodeEditor, { editItemType } from "./components/TimecodeEditor";
@@ -7,14 +7,6 @@ function App() {
   const [editItems, setEditItems] = useState<editItemType[]>();
   const [editItemsCount, setEditItemsCount] = useState<number>(0);
   const [isWide] = useMediaQuery("(min-width: 700px)");
-  useEffect(() => {
-    console.log(isWide ? "row" : "column");
-    if (isWide) {
-      console.log("横並び");
-    } else {
-      console.log("縦並び");
-    }
-  }, [isWide]);
   return (
     <Center
       className="App"
@@ -27,7 +19,7 @@ function App() {
         flex={isWide ? 4 : 2}
         h={"full"}
         w={isWide ? "auto" : "full"}
-        borderBottom="1px"
+        borderBottom={isWide ? "none" : "1px"}
       >
         <CanvasScreen editItems={editItems} editItemsCount={editItemsCount} />
       </Box>
@@ -35,7 +27,6 @@ function App() {
         flex={isWide ? 3 : 5}
         h={"full"}
         w={isWide ? "auto" : "full"}
-        paddingTop="10px"
         overflow="hidden"
       >
         <TimecodeEditor
