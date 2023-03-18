@@ -143,17 +143,22 @@ const CanvasScreen: FC<CanvasScreenProps> = ({ editItems, editItemsCount }) => {
       const ctx: CanvasRenderingContext2D = getContext();
       const recorder = (() => {
         onExportModalClose();
-        //canvasの取得
-        const canvas = getCanvas();
-        //canvasからストリームを取得
-        const stream = canvas.captureStream();
-        //ストリームからMediaRecorderを生成
-        const recorder = new MediaRecorder(stream, {
-          mimeType: "video/webm;codecs=vp9",
-        });
-        return recorder;
+
+        if (isExport) {
+          //canvasの取得
+          const canvas = getCanvas();
+          //canvasからストリームを取得
+          const stream = canvas.captureStream();
+          //ストリームからMediaRecorderを生成
+          const recorder = new MediaRecorder(stream, {
+            mimeType: "video/webm;codecs=vp9",
+          });
+          return recorder;
+        } else {
+          return undefined;
+        }
       })();
-      if (isExport) {
+      if (isExport && recorder) {
         //ダウンロード用のリンクを準備
         //録画終了時に動画ファイルのダウンロードリンクを生成する処理
         recorder.ondataavailable = function (e) {
@@ -203,7 +208,7 @@ const CanvasScreen: FC<CanvasScreenProps> = ({ editItems, editItemsCount }) => {
           ctx.fillRect(0, 0, canvasWidth, canvasHeight);
           ctx.save();
           setVideoState("canplay");
-          if (isExport) {
+          if (isExport && recorder) {
             recorder.stop();
             onExportModalOpen();
             setIsExpoort.off();
@@ -215,10 +220,11 @@ const CanvasScreen: FC<CanvasScreenProps> = ({ editItems, editItemsCount }) => {
     } catch (error) {
       // console.error(error);
       console.log(error);
-      setAlertTitle("アラート")
-      setAlertMessage("お使いの端末・ブラウザはサポートされておりません。")
-      onAlertOpen()
-      onStop()
+      setAlertTitle("アラート");
+      setAlertMessage("お使いの端末・ブラウザはサポートされておりません。");
+      onAlertOpen();
+      onStop();
+      setIsExpoort.off();
     }
   };
   const animationStart = () => {
@@ -465,13 +471,11 @@ const CanvasScreen: FC<CanvasScreenProps> = ({ editItems, editItemsCount }) => {
       >
         <AlertDialogOverlay>
           <AlertDialogContent>
-            <AlertDialogHeader fontSize='lg' fontWeight='bold'>
+            <AlertDialogHeader fontSize="lg" fontWeight="bold">
               {alertTitle}
             </AlertDialogHeader>
 
-            <AlertDialogBody>
-              {alertMessage}
-            </AlertDialogBody>
+            <AlertDialogBody>{alertMessage}</AlertDialogBody>
 
             <AlertDialogFooter>
               <Button ref={closeRef} onClick={onAlertClose}>
