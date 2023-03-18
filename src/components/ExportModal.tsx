@@ -1,6 +1,6 @@
 import {
-    Box,
   Button,
+  Center,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -39,7 +39,7 @@ const ExportModal: FC<ExportModalProps> = ({
         <ModalHeader>{title ?? "結果"}</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
-          <Box>
+          <Center>
             {blobUrl !== "" ? (
               <video
                 src={blobUrl}
@@ -53,7 +53,7 @@ const ExportModal: FC<ExportModalProps> = ({
             ) : (
               <></>
             )}
-          </Box>
+          </Center>
         </ModalBody>
         <ModalFooter>
           <Button onClick={onClose}>閉じる</Button>
@@ -63,4 +63,4 @@ const ExportModal: FC<ExportModalProps> = ({
   );
 };
 
-export default ExportModal
+export default ExportModal;
