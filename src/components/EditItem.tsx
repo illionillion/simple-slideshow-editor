@@ -8,7 +8,16 @@ import {
   Text,
   useBoolean,
 } from "@chakra-ui/react";
-import { ChangeEvent, Dispatch, FC, SetStateAction } from "react";
+import {
+  ChangeEvent,
+  Dispatch,
+  FC,
+  LegacyRef,
+  SetStateAction,
+  TouchEventHandler,
+  useEffect,
+  useRef,
+} from "react";
 import { editItemType } from "./TimecodeEditor";
 import { Reorder, useDragControls } from "framer-motion";
 import { DragHandleIcon } from "@chakra-ui/icons";
@@ -51,11 +60,33 @@ const EditItem: FC<EditItemProps> = ({ item, setEditItems }) => {
       )
     );
   };
+
+  // モバイル対応
+  const iRef = useRef<LegacyRef<SVGSVGElement> | undefined>(null);
+  useEffect(() => {
+    const touchHandler: TouchEventHandler<HTMLElement> = (e) =>
+      e.preventDefault();
+
+    const iTag = iRef.current;
+
+    if (iTag) {
+      //@ts-ignore
+      iTag.addEventListener("touchstart", touchHandler, { passive: false });
+
+      return () => {
+        //@ts-ignore
+        iTag.removeEventListener("touchstart", touchHandler, {
+          passive: false,
+        });
+      };
+    }
+  }, [iRef]);
   return (
     <ListItem
+      id={item?.no.toString()}
       as={Reorder.Item}
       value={item as unknown as string}
-      dragListener={isDragListener}
+      dragListener={false}
       dragControls={controls}
       w="95%"
       h="40%"
@@ -122,10 +153,9 @@ const EditItem: FC<EditItemProps> = ({ item, setEditItems }) => {
               </Center>
             </Center>
             <DragHandleIcon
-              onPointerDown={(e) => {
-                setIsDragListener.on();
-                controls.start(e);
-              }}
+              //@ts-ignore
+              ref={iRef}
+              onPointerDown={(e) => controls.start(e)}
               onPointerUp={() => setIsDragListener.off()}
               cursor="grab"
               boxSize="9"
