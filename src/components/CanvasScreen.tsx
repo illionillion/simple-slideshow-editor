@@ -20,6 +20,7 @@ import {
 import { FC, useEffect, useRef, useState } from "react";
 import ExportModal from "./ExportModal";
 import { editItemType } from "./TimecodeEditor";
+import IconIcon from "@reacticons/ionicons";
 
 interface CanvasScreenProps {
   editItems: editItemType[] | undefined;
@@ -434,7 +435,7 @@ const CanvasScreen: FC<CanvasScreenProps> = ({ editItems, editItemsCount }) => {
           );
         })()}
       </Center>
-      <Flex margin="24px auto 0px auto">
+      <Flex margin="24px auto 0px auto" gap="5px">
         <Button
           isDisabled={(() => {
             switch (videoState) {
@@ -447,14 +448,26 @@ const CanvasScreen: FC<CanvasScreenProps> = ({ editItems, editItemsCount }) => {
             }
           })()}
           onClick={animationStart}
+          title="再生"
         >
-          再生
+          {/* 再生 */}
+          <IconIcon name="play" />
         </Button>
-        <Button onClick={onStop} isDisabled={videoState !== "playing"}>
-          停止
+        <Button
+          onClick={onStop}
+          isDisabled={videoState !== "playing"}
+          title="停止"
+        >
+          {/* 停止 */}
+          <IconIcon name="stop" />
         </Button>
-        <Button isDisabled={videoState !== "canplay"} onClick={startExport}>
-          エクスポート
+        <Button
+          isDisabled={videoState !== "canplay"}
+          onClick={startExport}
+          title="エクスポート"
+        >
+          {/* エクスポート */}
+          <IconIcon name="cloud-upload" />
         </Button>
       </Flex>
       <ExportModal
