@@ -87,7 +87,14 @@ const CanvasScreen: FC<CanvasScreenProps> = ({ editItems, editItemsCount }) => {
     });
 
   const checkItem = () => {
-    if (!editItems || editItems.length === 0 || editItemsCount === 0) return;
+    if (!editItems || editItems.length === 0 || editItemsCount === 0) {
+      setVideoState("init");
+      // const ctx: CanvasRenderingContext2D = getContext();
+      // ctx.fillStyle = "#000";
+      // ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+      screenInit();
+      return;
+    }
     setTotalTime(editItems.reduce((prev, cuurent) => prev + cuurent.sec, 0)); // 合計時間
     setDisplayTime(0);
     screenInit();
@@ -111,16 +118,21 @@ const CanvasScreen: FC<CanvasScreenProps> = ({ editItems, editItemsCount }) => {
       })
     );
 
+    
     const img = new Image();
     setImageElement((prev) =>
-      prev
-        ? editItems.map((item) => {
-            const imgEle = new Image();
-            if (item.image) imgEle.src = URL.createObjectURL(item.image);
-            return imgEle;
-          })
-        : [img]
+    prev
+    ? editItems.map((item) => {
+      const imgEle = new Image();
+      if (item.image) imgEle.src = URL.createObjectURL(item.image);
+      return imgEle;
+    })
+    : [img]
     );
+    if (videoState === 'playing') {
+      // 再生中は停止
+      onStop();
+    }
     setVideoState("canplay");
   };
 
@@ -331,7 +343,7 @@ const CanvasScreen: FC<CanvasScreenProps> = ({ editItems, editItemsCount }) => {
     const img = new Image();
     ctx.fillStyle = "#000";
     ctx.fillRect(0, 0, canvasWidth, canvasHeight);
-    if (editItems && editItems[0].image) {
+    if (editItems && editItems.length > 0 && editItems[0].image) {
       img.src = URL.createObjectURL(editItems[0].image);
       img.onload = () => {
         const { naturalWidth: imageWidth, naturalHeight: imageHeight } = img;

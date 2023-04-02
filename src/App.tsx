@@ -1,5 +1,5 @@
 import { Box, Center, useMediaQuery } from "@chakra-ui/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./App.css";
 import CanvasScreen from "./components/CanvasScreen";
 import TimecodeEditor, { editItemType } from "./components/TimecodeEditor";
@@ -7,6 +7,9 @@ function App() {
   const [editItems, setEditItems] = useState<editItemType[]>();
   const [editItemsCount, setEditItemsCount] = useState<number>(0);
   const [isWide] = useMediaQuery("(min-width: 700px)");
+  useEffect(() => {
+    console.log(editItems);
+  }, [editItems]);
   return (
     <Center
       className="App"
