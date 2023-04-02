@@ -6,7 +6,6 @@ import {
   Input,
   ListItem,
   Text,
-  useBoolean,
 } from "@chakra-ui/react";
 import {
   ChangeEvent,
@@ -20,14 +19,13 @@ import {
 } from "react";
 import { editItemType } from "./TimecodeEditor";
 import { Reorder, useDragControls } from "framer-motion";
-import { DragHandleIcon } from "@chakra-ui/icons";
+import { DeleteIcon, DragHandleIcon } from "@chakra-ui/icons";
 
 interface EditItemProps {
   item: editItemType | undefined;
   setEditItems: Dispatch<SetStateAction<editItemType[] | undefined>>;
 }
 const EditItem: FC<EditItemProps> = ({ item, setEditItems }) => {
-  const [isDragListener, setIsDragListener] = useBoolean(false);
   const controls = useDragControls();
   const editTime = (e: ChangeEvent<HTMLInputElement>) => {
     setEditItems((prev) =>
@@ -43,6 +41,10 @@ const EditItem: FC<EditItemProps> = ({ item, setEditItems }) => {
           : edit
       )
     );
+  };
+  const deleteItem = (no: number | undefined) => {
+    if (no === undefined) return;
+    setEditItems((prev) => prev?.filter((item) => item.no !== no));
   };
   const editImage = (e: ChangeEvent<HTMLInputElement>) => {
     console.log(e.target.files);
@@ -96,7 +98,15 @@ const EditItem: FC<EditItemProps> = ({ item, setEditItems }) => {
     >
       <Card h="full" border="1px">
         <CardBody>
-          <Center h="full">
+          <Center h="full" position="relative">
+            <DeleteIcon
+              position="absolute"
+              top="0%"
+              right="0%"
+              fontSize="lg"
+              cursor="pointer"
+              onClick={() => deleteItem(item?.no)}
+            />
             <Center flex={1} h="full" position="relative" bg="#000">
               {item?.image ? (
                 <Image
@@ -156,7 +166,6 @@ const EditItem: FC<EditItemProps> = ({ item, setEditItems }) => {
               //@ts-ignore
               ref={iRef}
               onPointerDown={(e) => controls.start(e)}
-              onPointerUp={() => setIsDragListener.off()}
               cursor="grab"
               boxSize="9"
             />

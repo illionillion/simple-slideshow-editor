@@ -2,6 +2,8 @@ import { Button, Center, Flex, List } from "@chakra-ui/react";
 import { Dispatch, FC, SetStateAction } from "react";
 import EditItem from "./EditItem";
 import { Reorder } from "framer-motion";
+import IonIcon from "@reacticons/ionicons";
+import { AddIcon } from "@chakra-ui/icons";
 export interface editItemType {
   no: number;
   sec: number;
@@ -44,8 +46,15 @@ const TimecodeEditor: FC<TimecodeEditorProps> = ({
         ))}
       </List>
       <Center w="full" h="16" minH={16} borderTop="1px">
-        <Button w="16" h="10" minH={10} m="auto" onClick={addEditorItem}>
-          追加
+        <Button
+          w="16"
+          h="10"
+          minH={10}
+          m="auto"
+          onClick={addEditorItem}
+          title="追加"
+        >
+          <AddIcon />
         </Button>
       </Center>
     </Flex>

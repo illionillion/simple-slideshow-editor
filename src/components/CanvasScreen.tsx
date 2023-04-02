@@ -20,6 +20,7 @@ import {
 import { FC, useEffect, useRef, useState } from "react";
 import ExportModal from "./ExportModal";
 import { editItemType } from "./TimecodeEditor";
+import IconIcon from "@reacticons/ionicons";
 
 interface CanvasScreenProps {
   editItems: editItemType[] | undefined;
@@ -86,7 +87,14 @@ const CanvasScreen: FC<CanvasScreenProps> = ({ editItems, editItemsCount }) => {
     });
 
   const checkItem = () => {
-    if (!editItems || editItems.length === 0 || editItemsCount === 0) return;
+    if (!editItems || editItems.length === 0 || editItemsCount === 0) {
+      setVideoState("init");
+      // const ctx: CanvasRenderingContext2D = getContext();
+      // ctx.fillStyle = "#000";
+      // ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+      screenInit();
+      return;
+    }
     setTotalTime(editItems.reduce((prev, cuurent) => prev + cuurent.sec, 0)); // 合計時間
     setDisplayTime(0);
     screenInit();
@@ -110,16 +118,21 @@ const CanvasScreen: FC<CanvasScreenProps> = ({ editItems, editItemsCount }) => {
       })
     );
 
+    
     const img = new Image();
     setImageElement((prev) =>
-      prev
-        ? editItems.map((item) => {
-            const imgEle = new Image();
-            if (item.image) imgEle.src = URL.createObjectURL(item.image);
-            return imgEle;
-          })
-        : [img]
+    prev
+    ? editItems.map((item) => {
+      const imgEle = new Image();
+      if (item.image) imgEle.src = URL.createObjectURL(item.image);
+      return imgEle;
+    })
+    : [img]
     );
+    if (videoState === 'playing') {
+      // 再生中は停止
+      onStop();
+    }
     setVideoState("canplay");
   };
 
@@ -330,7 +343,7 @@ const CanvasScreen: FC<CanvasScreenProps> = ({ editItems, editItemsCount }) => {
     const img = new Image();
     ctx.fillStyle = "#000";
     ctx.fillRect(0, 0, canvasWidth, canvasHeight);
-    if (editItems && editItems[0].image) {
+    if (editItems && editItems.length > 0 && editItems[0].image) {
       img.src = URL.createObjectURL(editItems[0].image);
       img.onload = () => {
         const { naturalWidth: imageWidth, naturalHeight: imageHeight } = img;
@@ -434,7 +447,7 @@ const CanvasScreen: FC<CanvasScreenProps> = ({ editItems, editItemsCount }) => {
           );
         })()}
       </Center>
-      <Flex margin="24px auto 0px auto">
+      <Flex margin="24px auto 0px auto" gap="5px">
         <Button
           isDisabled={(() => {
             switch (videoState) {
@@ -447,14 +460,26 @@ const CanvasScreen: FC<CanvasScreenProps> = ({ editItems, editItemsCount }) => {
             }
           })()}
           onClick={animationStart}
+          title="再生"
         >
-          再生
+          {/* 再生 */}
+          <IconIcon name="play" />
         </Button>
-        <Button onClick={onStop} isDisabled={videoState !== "playing"}>
-          停止
+        <Button
+          onClick={onStop}
+          isDisabled={videoState !== "playing"}
+          title="停止"
+        >
+          {/* 停止 */}
+          <IconIcon name="stop" />
         </Button>
-        <Button isDisabled={videoState !== "canplay"} onClick={startExport}>
-          エクスポート
+        <Button
+          isDisabled={videoState !== "canplay"}
+          onClick={startExport}
+          title="エクスポート"
+        >
+          {/* エクスポート */}
+          <IconIcon name="cloud-upload" />
         </Button>
       </Flex>
       <ExportModal
