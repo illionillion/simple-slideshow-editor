@@ -118,18 +118,17 @@ const CanvasScreen: FC<CanvasScreenProps> = ({ editItems, editItemsCount }) => {
       })
     );
 
-    
     const img = new Image();
     setImageElement((prev) =>
-    prev
-    ? editItems.map((item) => {
-      const imgEle = new Image();
-      if (item.image) imgEle.src = URL.createObjectURL(item.image);
-      return imgEle;
-    })
-    : [img]
+      prev
+        ? editItems.map((item) => {
+            const imgEle = new Image();
+            if (item.image) imgEle.src = URL.createObjectURL(item.image);
+            return imgEle;
+          })
+        : [img]
     );
-    if (videoState === 'playing') {
+    if (videoState === "playing") {
       // 再生中は停止
       onStop();
     }
