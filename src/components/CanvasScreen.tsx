@@ -447,6 +447,7 @@ const CanvasScreen: FC<CanvasScreenProps> = ({ editItems, editItemsCount }) => {
           );
         })()}
       </Center>
+      {/* @ts-ignore */}
       <Flex margin="24px auto 0px auto" gap="5px">
         <Button
           isDisabled={(() => {
