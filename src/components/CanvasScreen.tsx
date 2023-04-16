@@ -242,7 +242,7 @@ const CanvasScreen: FC<CanvasScreenProps> = ({ editItems, editItemsCount }) => {
             onSpinnerClose();
           }
         }
-      }, 4);
+      }, 40);
       setTimerId(timer);
     } catch (error) {
       // console.error(error);
@@ -317,8 +317,8 @@ const CanvasScreen: FC<CanvasScreenProps> = ({ editItems, editItemsCount }) => {
       imageDom,
       deltaParallelMoveX,
       deltaParallelMoveY,
-      imageDomWidth * ratio,
-      imageDomHeight * ratio
+      previewAreaDomWidth * ratio,
+      previewAreaDomHeight * ratio
     );
     canvasDomContext.save();
   };
