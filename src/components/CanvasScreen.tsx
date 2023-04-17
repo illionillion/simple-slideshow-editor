@@ -17,7 +17,7 @@ import {
   useBoolean,
   useDisclosure,
 } from "@chakra-ui/react";
-import { FC, useEffect, useRef, useState } from "react";
+import { FC, RefObject, useEffect, useRef, useState } from "react";
 import ExportModal from "./ExportModal";
 import { editItemType } from "./TimecodeEditor";
 import IconIcon from "@reacticons/ionicons";
@@ -27,9 +27,12 @@ interface CanvasScreenProps {
   editItemsCount: number;
 }
 const CanvasScreen: FC<CanvasScreenProps> = ({ editItems, editItemsCount }) => {
+  const width = 1920;
+  const height = 1080;
   const [canvasWidth, setCanvasWidth] = useState<number>(350);
   const [canvasHeight, setCanvasHeight] = useState<number>(200);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const fullCanvasRef = useRef<HTMLCanvasElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const [imageElement, setImageElement] = useState<HTMLImageElement[]>();
   const [videoState, setVideoState] = useState<"init" | "canplay" | "playing">(
@@ -61,13 +64,13 @@ const CanvasScreen: FC<CanvasScreenProps> = ({ editItems, editItemsCount }) => {
     onClose: onSpinnerClose,
   } = useDisclosure();
   const [isExport, setIsExpoort] = useBoolean(false);
-  const getCanvas = (): HTMLCanvasElement => {
-    const canvas: any = canvasRef.current;
+  const getCanvas = (ref: RefObject<HTMLCanvasElement>): HTMLCanvasElement => {
+    const canvas: any = ref.current;
 
     return canvas;
   };
-  const getContext = (): CanvasRenderingContext2D => {
-    const canvas: any = canvasRef.current;
+  const getContext = (ref: RefObject<HTMLCanvasElement>): CanvasRenderingContext2D => {
+    const canvas: any = ref.current;
 
     return canvas.getContext("2d");
   };
@@ -152,13 +155,14 @@ const CanvasScreen: FC<CanvasScreenProps> = ({ editItems, editItemsCount }) => {
   };
   const onPlaying = () => {
     try {
-      const ctx: CanvasRenderingContext2D = getContext();
+      const ctx: CanvasRenderingContext2D = getContext(canvasRef);
+      const fullctx: CanvasRenderingContext2D = getContext(fullCanvasRef);
       const recorder = (() => {
         onExportModalClose();
 
         if (isExport) {
           //canvasの取得
-          const canvas = getCanvas();
+          const canvas = getCanvas(fullCanvasRef);
           //canvasからストリームを取得
           const stream = canvas.captureStream();
           //ストリームからMediaRecorderを生成
@@ -208,7 +212,16 @@ const CanvasScreen: FC<CanvasScreenProps> = ({ editItems, editItemsCount }) => {
             imageWidth,
             imageHeight,
             canvasWidth,
-            canvasHeight
+            canvasHeight,
+            canvasRef
+          );
+          reflectImage2Canvas(
+            imageElement[index],
+            imageWidth,
+            imageHeight,
+            width,
+            height,
+            fullCanvasRef
           );
         }
 
@@ -219,6 +232,8 @@ const CanvasScreen: FC<CanvasScreenProps> = ({ editItems, editItemsCount }) => {
           setTimerId(undefined);
           ctx.fillRect(0, 0, canvasWidth, canvasHeight);
           ctx.save();
+          fullctx.fillRect(0, 0, width, height);
+          fullctx.save();
           setVideoState("canplay");
           if (isExport && recorder) {
             recorder.stop();
@@ -270,10 +285,11 @@ const CanvasScreen: FC<CanvasScreenProps> = ({ editItems, editItemsCount }) => {
     imageDomWidth: number,
     imageDomHeight: number,
     previewAreaDomWidth: number,
-    previewAreaDomHeight: number
+    previewAreaDomHeight: number,
+    ref: RefObject<HTMLCanvasElement>
   ) => {
-    const canvasDom = getCanvas();
-    const canvasDomContext = getContext();
+    const canvasDom = getCanvas(ref);
+    const canvasDomContext = getContext(ref);
     const adjustedRatio = 0.85;
     const ratio =
       adjustedRatio *
@@ -296,7 +312,7 @@ const CanvasScreen: FC<CanvasScreenProps> = ({ editItems, editItemsCount }) => {
     const deltaParallelMoveY = previewAreaDomCenterY - resizedImageDomCenterY;
 
     canvasDomContext.fillStyle = "#000";
-    canvasDomContext.fillRect(0, 0, canvasWidth, canvasHeight);
+    canvasDomContext.fillRect(0, 0, previewAreaDomWidth, previewAreaDomHeight);
     canvasDomContext.drawImage(
       imageDom,
       deltaParallelMoveX,
@@ -337,11 +353,15 @@ const CanvasScreen: FC<CanvasScreenProps> = ({ editItems, editItemsCount }) => {
    * 画像追加・画面リサイズ時の画面初期化
    */
   const screenInit = () => {
-    const ctx: CanvasRenderingContext2D = getContext();
+    const ctx: CanvasRenderingContext2D = getContext(canvasRef);
+    const fullctx: CanvasRenderingContext2D = getContext(fullCanvasRef);
     ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+    fullctx.clearRect(0, 0, width, height);
     const img = new Image();
     ctx.fillStyle = "#000";
     ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+    fullctx.fillStyle = "#000";
+    fullctx.fillRect(0, 0, width, height);
     if (editItems && editItems.length > 0 && editItems[0].image) {
       img.src = URL.createObjectURL(editItems[0].image);
       img.onload = () => {
@@ -351,12 +371,23 @@ const CanvasScreen: FC<CanvasScreenProps> = ({ editItems, editItemsCount }) => {
           imageWidth,
           imageHeight,
           canvasWidth,
-          canvasHeight
+          canvasHeight,
+          canvasRef
+        );
+        reflectImage2Canvas(
+          img,
+          imageWidth,
+          imageHeight,
+          width,
+          height,
+          fullCanvasRef
         );
       };
     } else {
       ctx.fillStyle = "#000";
       ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+      fullctx.fillStyle = "#000";
+      fullctx.fillRect(0, 0, width, height);
     }
   };
 
@@ -410,6 +441,12 @@ const CanvasScreen: FC<CanvasScreenProps> = ({ editItems, editItemsCount }) => {
           height={canvasHeight}
           ref={canvasRef}
           style={{ borderBlock: "solid", borderWidth: 1, borderColor: "#000" }}
+        ></canvas>
+        <canvas
+          width={width}
+          height={height}
+          ref={fullCanvasRef}
+          style={{ borderBlock: "solid", borderWidth: 1, borderColor: "#000", position: "fixed", left: - width }}
         ></canvas>
       </Box>
       <Center width="full" height="10px">
