@@ -312,13 +312,13 @@ const CanvasScreen: FC<CanvasScreenProps> = ({ editItems, editItemsCount }) => {
     const deltaParallelMoveY = previewAreaDomCenterY - resizedImageDomCenterY;
 
     canvasDomContext.fillStyle = "#000";
-    canvasDomContext.fillRect(0, 0, canvasWidth, canvasHeight);
+    canvasDomContext.fillRect(0, 0, previewAreaDomWidth, previewAreaDomHeight);
     canvasDomContext.drawImage(
       imageDom,
       deltaParallelMoveX,
       deltaParallelMoveY,
-      previewAreaDomWidth * ratio,
-      previewAreaDomHeight * ratio
+      imageDomWidth * ratio,
+      imageDomHeight * ratio
     );
     canvasDomContext.save();
   };
