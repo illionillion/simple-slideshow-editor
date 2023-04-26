@@ -1,46 +1,78 @@
-# Getting Started with Create React App
+# simple-slideshow-editor
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+simple-slideshow-editorはReactベースのシンプルなスライドショーエディターです。 
 
-## Available Scripts
+---
 
-In the project directory, you can run:
+## 概要
 
-### `npm start`
+このプロジェクトは、スライドショーエディターを作成することを目的としています。デスクトップ画面での編集が主なユースケースです。画像を選び、時間軸上にセットし、シーケンスの再生、エクスポートを行うことができます。
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+### ディレクトリ構成
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+```
+simple-slideshow-editor
+    ├── README.md
+    ├── package-lock.json
+    ├── package.json
+    ├── public
+    │   ├── favicon.ico
+    │   ├── images
+    │   ├── index.html
+    │   ├── logo192.png
+    │   ├── logo512.png
+    │   ├── manifest.json
+    │   └── robots.txt
+    ├── src
+    │   ├── App.css
+    │   ├── App.tsx
+    │   ├── components
+    │   |   ├── CanvasScreen.tsx
+    │   |   ├── EditItem.tsx
+    │   |   ├── ExportModal.tsx
+    │   |   └── TimecodeEditor.tsx
+    │   ├── index.css
+    │   └── index.tsx
+    └── tsconfig.json
+```
 
-### `npm test`
+### 使用方法
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+1. 画像を追加します。左側のウインドウで、追加したい画像を選びます。
+2. 追加した画像は、時間軸上に表示されます。画像を時間軸にドラッグ＆ドロップすることができます。また、画像を削除する場合は画像を右クリックして、Deleteキーを押します。
+3. キャンバス画面の下部には再生、停止、ポーズ、ループのコントロールボタンがあります。スライドショーの再生を行いたい画像を選択し、再生ボタンをクリックします。
+4. 編集したスライドショーをエクスポートする場合は、エクスポートボタンをクリックしてください。
 
-### `npm run build`
+※ ユーザーが使用できるファイル形式は.mp4のみです。
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### ライブラリ
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+simple-slideshow-editorは以下のライブラリを使用しています。
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+- @chakra-ui/react
+- React
+- TypeScript
 
-### `npm run eject`
+---
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+## Configuration Diagram
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+```mermaid
+graph LR;
+  App-->|imports|Box;
+  App-->|imports|Center;
+  App-->|imports|useMediaQuery;
+  App-->|imports|useEffect;
+  App-->|imports|useState;
+  App-->|imports|CanvasScreen;
+  App-->|imports|TimecodeEditor;
+  Box-->|props|CanvasScreen;
+  Center-->|props|Box;
+  Box-->|props|TimecodeEditor;
+  TimecodeEditor-->|props|editItems;
+  TimecodeEditor-->|props|setEditItems;
+  TimecodeEditor-->|props|editItemsCount;
+  TimecodeEditor-->|props|setEditItemsCount;
+  CanvasScreen-->|props|editItems;
+  CanvasScreen-->|props|editItemsCount;
+```
