@@ -27,7 +27,7 @@ interface CanvasScreenProps {
   editItemsCount: number;
 }
 const CanvasScreen: FC<CanvasScreenProps> = ({ editItems, editItemsCount }) => {
-  const width = 1920;
+  const width = 1920; // 実画面の縦横幅を取得して大きい方を基準に 16 : 9を設定する
   const height = 1080;
   const [canvasWidth, setCanvasWidth] = useState<number>(350);
   const [canvasHeight, setCanvasHeight] = useState<number>(200);
